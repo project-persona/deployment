@@ -1,0 +1,99 @@
+version: '3.4'
+
+volumes:
+  mongodb-store:
+    name: mongodb-store
+
+services:
+  mongodb: # Consider switching to MongoDB Atlas for production
+    image: mongo
+    volumes:
+      - mongodb-store:/data/db
+    expose:
+      - "27017"
+    ports: # also forward to localhost for debugging via local clients (eg. MongoDB Compass)
+      - "127.0.0.1:27017:27017"
+
+  reverse-proxy: # HTTPS is not required as long as development happens on "http://localhost:8080"
+    image: project-persona/reverse-proxy
+    build:
+      context: ./services/reverse-proxy
+      args:
+        branch: master # front end branch
+    ports:
+      - "8080:80" # Development only: listen on 8080 instead of 80
+    links:
+      - api-gateway:upstream
+    depends_on:
+      - api-gateway
+
+  api-gateway:
+    image: project-persona/infra-executables
+    build:
+      context: ./services/infra-executables
+      args:
+        branch: master
+    depends_on:
+      - service-broker
+    ports: # also forward to localhost debugging via http clients (eg. Postman)
+      - "8081:80"
+    environment:
+      PORT: "80"
+      HOST: "0.0.0.0"
+      BROKER_ADDR: "tcp://service-broker:5555"
+    expose:
+      - "80"
+    command: "start-gateway"
+
+  service-broker:
+    image: project-persona/infra-executables
+    build:
+      context: ./services/infra-executables
+      args:
+        branch: master
+    environment:
+      BROKER_ADDR: "tcp://0.0.0.0:5555"
+    expose:
+      - "5555"
+    command: "start-broker"
+
+  microservice-personas:
+    image: project-persona/microservice-personas
+    build:
+      context: ./services/templated-microservice
+      args:
+        repo: microservice-personas
+        branch: master
+    environment:
+      BROKER_ADDR: "tcp://service-broker:5555"
+      MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
+    depends_on:
+      - service-broker
+
+  microservice-notes:
+    image: project-persona/microservice-notes
+    build:
+      context: ./services/templated-microservice
+      args:
+        repo: microservice-notes
+        branch: master
+    environment:
+      BROKER_ADDR: "tcp://service-broker:5555"
+      MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
+    depends_on:
+      - service-broker
+
+  microservice-emails:
+    image: project-persona/microservice-emails
+    build:
+      context: ./services/templated-microservice
+      args:
+        repo: microservice-emails
+        branch: master
+    environment:
+      BROKER_ADDR: "tcp://service-broker:5555"
+      MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
+    depends_on:
+      - service-broker
+
+
