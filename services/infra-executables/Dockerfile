@@ -1,4 +1,6 @@
-FROM node
+FROM node:lts-alpine
+
+RUN apk add git
 
 ARG branch=master
 

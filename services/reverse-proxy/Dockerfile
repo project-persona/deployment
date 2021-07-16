@@ -1,4 +1,4 @@
-FROM node as builder
+FROM node:lts-alpine as builder
 
 ARG branch=master
 

@@ -11,7 +11,7 @@
 - [ ] `microservice-passwords`: emails microservice
 - [x] `microservice-notes`: notes microservice
 - [x] `microservice-emails`: emails microservice
-- [ ] `smtp`: SMTP receive-only email server
+- [x] `smtp`: SMTP receive-only email server
 
 ## Development Environment
 

@@ -14,6 +14,7 @@ services:
     ports: # also forward to localhost for debugging via local clients (eg. MongoDB Compass)
       - "127.0.0.1:27017:27017"
 
+  # add SSL certs for production
   reverse-proxy: # HTTPS is not required as long as development happens on "http://localhost:8080"
     image: project-persona/reverse-proxy
     build:
@@ -70,6 +71,8 @@ services:
     depends_on:
       - service-broker
 
+  # microservice-passwords
+
   microservice-notes:
     image: project-persona/microservice-notes
     build:
@@ -96,4 +99,14 @@ services:
     depends_on:
       - service-broker
 
-
+  smtp-server:
+    image: project-persona/smtp-server
+    build:
+      context: ./services/smtp-server
+      args:
+        branch: master
+    environment:
+      BROKER_ADDR: "tcp://service-broker:5555"
+      # add SSL certs for production
+    depends_on:
+      - service-broker
