@@ -70,6 +70,7 @@ services:
       MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
     depends_on:
       - service-broker
+      - mongodb
 
   # microservice-passwords
 
@@ -85,6 +86,7 @@ services:
       MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
     depends_on:
       - service-broker
+      - mongodb
 
   microservice-emails:
     image: project-persona/microservice-emails
@@ -98,6 +100,7 @@ services:
       MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
     depends_on:
       - service-broker
+      - mongodb
 
   smtp-server:
     image: project-persona/smtp-server
@@ -110,3 +113,4 @@ services:
       # add SSL certs for production
     depends_on:
       - service-broker
+      - microservice-emails
