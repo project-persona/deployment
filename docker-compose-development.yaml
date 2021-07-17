@@ -111,6 +111,10 @@ services:
     environment:
       BROKER_ADDR: "tcp://service-broker:5555"
       # add SSL certs for production
+    expose:
+      - "25"
+    ports:
+      - "25:25"
     depends_on:
       - service-broker
       - microservice-emails
