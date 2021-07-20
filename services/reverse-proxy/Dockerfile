@@ -1,10 +1,14 @@
 FROM node:lts-alpine as builder
 
+RUN apk add git
+
 ARG branch=master
 
-# TODO: update frontend build script once repository if up
-RUN mkdir -p /src/dist  \
-    && echo "placeholder front end resource" > /src/dist/index.html
+RUN mkdir -p /src  \
+    && cd /src \
+    && git clone https://github.com/project-persona/web-client.git . --branch $branch --depth 1 \
+    && npm install \
+    && npm run generate
 
 FROM nginx
 
