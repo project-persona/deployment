@@ -122,7 +122,10 @@ services:
         branch: master
     environment:
       BROKER_ADDR: "tcp://service-broker:5555"
-      # add SSL certs for production
+      TLS_CERT: "/certs/certificate.crt"
+      TLS_KEY: "/certs/private.key"
+    volumes:
+      - ~/.certs/:/certs/
     expose:
       - "25"
     ports:
