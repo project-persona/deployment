@@ -25,6 +25,8 @@ services:
       - api-gateway:upstream
     depends_on:
       - api-gateway
+    volumes:
+      - ~/.certs/:/etc/nginx/certs/
 
   api-gateway:
     image: project-persona/infra-executables

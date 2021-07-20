@@ -15,6 +15,7 @@ FROM nginx
 # TODO: copy in certificates for production
 
 COPY default.conf /etc/nginx/conf.d/
+COPY ssl.conf /etc/nginx/snippets/
 
 COPY --from=builder /src/dist/. /usr/share/nginx/html/
 
