@@ -72,7 +72,19 @@ services:
       - service-broker
       - mongodb
 
-  # microservice-passwords
+  microservice-passwords:
+    image: project-persona/microservice-notes
+    build:
+      context: ./services/templated-microservice
+      args:
+        repo: microservice-passwords
+        branch: master
+    environment:
+      BROKER_ADDR: "tcp://service-broker:5555"
+      MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
+    depends_on:
+      - service-broker
+      - mongodb
 
   microservice-notes:
     image: project-persona/microservice-notes
