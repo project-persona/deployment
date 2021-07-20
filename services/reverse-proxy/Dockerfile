@@ -16,6 +16,6 @@ FROM nginx
 
 COPY default.conf /etc/nginx/conf.d/
 
-COPY --from=builder /src/dist/* /usr/share/nginx/html/
+COPY --from=builder /src/dist/. /usr/share/nginx/html/
 
 
