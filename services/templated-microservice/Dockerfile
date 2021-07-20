@@ -1,6 +1,9 @@
 FROM node:lts-alpine
 
-RUN apk add git python g++ make curl cmake openssh
+RUN apk add git python g++ make curl cmake
+
+RUN git config --global url."https://github.com/".insteadOf git@github.com: \
+    && git config --global url."https://".insteadOf git://
 
 ARG repo
 ARG branch=master
