@@ -1,6 +1,6 @@
 FROM node:lts-alpine
 
-RUN apk add git python g++ make curl cmake
+RUN apk add git python g++ make curl cmake openssh
 
 ARG repo
 ARG branch=master
