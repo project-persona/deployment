@@ -1,0 +1,143 @@
+version: '3.4'
+
+volumes:
+  mongodb-store:
+    name: mongodb-store-staging
+
+services:
+  mongodb: # Consider switching to MongoDB Atlas for production
+    image: mongo
+    volumes:
+      - mongodb-store:/data/db
+    expose:
+      - "27017"
+
+  reverse-proxy:
+    image: project-persona/reverse-proxy
+    build:
+      context: ./services/reverse-proxy
+      args:
+        branch: master # front end branch
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - api-gateway:upstream
+    depends_on:
+      - api-gateway
+    volumes:
+      - ~/.certs/:/etc/nginx/certs/
+      - ./services/reverse-proxy/default-ssl.conf:/etc/nginx/conf.d/default.conf
+
+  api-gateway:
+    image: project-persona/infra-executables
+    build:
+      context: ./services/infra-executables
+      args:
+        branch: master
+    depends_on:
+      - service-broker
+    environment:
+      PORT: "80"
+      HOST: "0.0.0.0"
+      BROKER_ADDR: "tcp://service-broker:5555"
+      NODE_ENV: 'development'
+    expose:
+      - "80"
+    command: "start-gateway"
+
+  service-broker:
+    image: project-persona/infra-executables
+    build:
+      context: ./services/infra-executables
+      args:
+        branch: master
+    environment:
+      BROKER_ADDR: "tcp://0.0.0.0:5555"
+    expose:
+      - "5555"
+    command: "start-broker"
+
+  microservice-personas:
+    image: project-persona/microservice-personas
+    build:
+      context: ./services/templated-microservice
+      args:
+        repo: microservice-personas
+        branch: post-checkpoint-refactor
+    environment:
+      BROKER_ADDR: "tcp://service-broker:5555"
+      MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
+    volumes:
+      - ~/service-account-file.json:/service-account-file.json
+    depends_on:
+      - service-broker
+      - mongodb
+
+  microservice-passwords:
+    image: project-persona/microservice-notes
+    build:
+      context: ./services/templated-microservice
+      args:
+        repo: microservice-passwords
+        branch: post-checkpoint-refactor
+    environment:
+      BROKER_ADDR: "tcp://service-broker:5555"
+      MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
+    volumes:
+      - ~/service-account-file.json:/service-account-file.json
+    depends_on:
+      - service-broker
+      - mongodb
+
+  microservice-notes:
+    image: project-persona/microservice-notes
+    build:
+      context: ./services/templated-microservice
+      args:
+        repo: microservice-notes
+        branch: post-checkpoint-refactor
+    environment:
+      BROKER_ADDR: "tcp://service-broker:5555"
+      MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
+    volumes:
+      - ~/service-account-file.json:/service-account-file.json
+    depends_on:
+      - service-broker
+      - mongodb
+
+  microservice-emails:
+    image: project-persona/microservice-emails
+    build:
+      context: ./services/templated-microservice
+      args:
+        repo: microservice-emails
+        branch: post-checkpoint-refactor
+    environment:
+      BROKER_ADDR: "tcp://service-broker:5555"
+      MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
+    volumes:
+      - ~/service-account-file.json:/service-account-file.json
+    depends_on:
+      - service-broker
+      - mongodb
+
+  smtp-server:
+    image: project-persona/smtp-server
+    build:
+      context: ./services/smtp-server
+      args:
+        branch: post-checkpoint-refactor
+    environment:
+      BROKER_ADDR: "tcp://service-broker:5555"
+      TLS_CERT: "/certs/certificate.crt"
+      TLS_KEY: "/certs/private.key"
+    volumes:
+      - ~/.certs/:/certs/
+    expose:
+      - "25"
+    ports:
+      - "25:25"
+    depends_on:
+      - service-broker
+      - microservice-emails
