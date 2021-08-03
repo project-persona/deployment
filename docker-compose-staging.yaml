@@ -62,7 +62,7 @@ services:
       - mongodb
 
   microservice-passwords:
-    image: ghcr.io/project-persona/microservice-notes
+    image: ghcr.io/project-persona/microservice-passwords
     environment:
       BROKER_ADDR: "tcp://service-broker:5555"
       MONGO_CONNECTION_STRING: "mongodb://mongodb:27017"
