@@ -13,21 +13,23 @@ services:
       - "27017"
 
   reverse-proxy:
-    image: project-persona/reverse-proxy
-    build:
-      context: ./services/reverse-proxy
-      args:
-        branch: master # front end branch
+    image: nginx
     ports:
       - "80:80"
       - "443:443"
     links:
-      - api-gateway:upstream
+      - api-gateway:api-upstream
+      - web-client:web-upstream
     depends_on:
       - api-gateway
     volumes:
       - ~/.certs/:/etc/nginx/certs/
       - ./services/reverse-proxy/default-ssl.conf:/etc/nginx/conf.d/default.conf
+
+  web-client:
+    image: ghcr.io/project-persona/web-client
+    expose:
+      - "3000"
 
   api-gateway:
     image: ghcr.io/project-persona/infra-executables
