@@ -62,6 +62,8 @@ services:
     depends_on:
       - service-broker
       - mongodb
+    deploy:
+      replicas: 4
 
   microservice-passwords:
     image: ghcr.io/project-persona/microservice-passwords
